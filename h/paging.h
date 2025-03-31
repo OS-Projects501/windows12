@@ -53,7 +53,7 @@ typedef struct{
 typedef struct{
   int fr_status;			/* MAPPED or UNMAPPED		*/
   int fr_pid;				/* process id using this frame  */
-  int fr_vpno;				/* corresponding virtual page number*/
+  int fr_vpno;				/* corresponding virtual page no*/
   int fr_refcnt;			/* reference count		*/
   int fr_type;				/* FR_DIR, FR_TBL, FR_PAGE	*/
   int fr_dirty;
@@ -86,11 +86,10 @@ SYSCALL write_bs(char *, bsd_t, int);
 #define FR_TBL		1
 #define FR_DIR		2
 
-#define FR_DIRTY	1
-#define FR_NOT_DIRTY	0
-
 #define SC 3
 #define FIFO 4
 
 #define BACKING_STORE_BASE	0x00800000
 #define BACKING_STORE_UNIT_SIZE 0x00100000
+
+#define NBS 16  
