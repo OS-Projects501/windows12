@@ -20,14 +20,14 @@ unsigned size;
     /* Get process entry */
     pptr = &proctab[currpid];
 
-    /* Make sure process has a virtual heap and memory list is initialized */
+    /* Making sure process has a virtual heap and memory list is initialized */
     if (pptr->vhpnpages <= 0 || pptr->vmemlist == NULL)
     {
         restore(ps);
         return SYSERR;
     }
 
-    /* Calculate virtual heap boundaries */
+    /* Calculating the  virtual heap boundaries {yet to fix this issue} */
     vheapstart = pptr->vhpno * NBPG;
     vheapend = vheapstart + (pptr->vhpnpages * NBPG);
 
@@ -43,12 +43,12 @@ unsigned size;
     size = (unsigned)roundmb(size);
     block = (struct mblock *)((unsigned)block);
 
-    /* Find where the block fits in the free memory list */
+    /* Finding where the block fits in the free memory list */
     for (q = pptr->vmemlist, p = pptr->vmemlist->mnext;
          p != pptr->vmemlist && (unsigned)block > (unsigned)p;
          q = p, p = p->mnext)
     {
-        /* Empty loop body - just finding the correct position */
+        /* Empty loop for finding the correct position */
     }
 
     /* Check if the block to free overlaps with any existing blocks */
