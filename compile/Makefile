@@ -3,7 +3,7 @@
 #
 
 INCLUDE = -I../h
-CFLAGS  = -m32 -march=i586 -fno-builtin -fno-stack-protector -c -Wall -O ${DEFS} ${INCLUDE}
+CFLAGS  = -m32 -march=i586 -fno-stack-protector -fno-builtin -c -Wall -O ${DEFS} ${INCLUDE}
 SDEFS	= -I../h
 ASFLAGS = --32
 
@@ -48,7 +48,7 @@ SYS =	blkcmp.c	blkequ.c	main.c		stacktrace.c	\
 	signal.c	signaln.c	sleep.c		sleep10.c	\
 	sleep100.c	sleep1000.c	sreset.c	suspend.c	\
 	unsleep.c	userret.c	wait.c		wakeup.c	\
-	write.c		xdone.c		pci.c           shutdown.c
+	write.c		xdone.c		pci.c           shutdown.c \
 
 TTY =	ttyalloc.c	ttycntl.c	ttygetc.c	ttyiin.c	\
 	ttyinit.c	ttynew.c	ttyopen.c	ttyputc.c	\
@@ -57,7 +57,8 @@ TTY =	ttyalloc.c	ttycntl.c	ttygetc.c	ttyiin.c	\
 PG  =   get_bs.c        release_bs.c    read_bs.c       write_bs.c      \
         control_reg.c   bsm.c           policy.c        \
         frame.c         pfint.c         dump32.c        vcreate.c       \
-        xm.c            vgetmem.c       vfreemem.c
+        xm.c            vgetmem.c       vfreemem.c       \
+        paging_sc.c     paging_fifo.c
 
 SRC = ${COM} ${TTY} ${MON} ${SYS}
 
@@ -176,7 +177,7 @@ montftp.o: ../mon/montftp.c
 comint.o: ../com/comint.S
 	${CPP} ${SDEFS} ../com/comint.S | ${AS} ${ASFLAGS} -o comint.o
 
-initialize.o: $(OBJ) startup.o 
+initialize.o: $(OBJ) startup.o paging_sc.o paging_fifo.o
 	sh mkvers.sh
 	${CC} -c ${CFLAGS} -DVERSION=\""`cat version`"\" ../sys/initialize.c
 
@@ -449,37 +450,50 @@ monudp.o: ../mon/monudp.c /usr/include/stdc-predef.h \
  ../h/./mon/monitor.h ../h/./mon/moncom.h ../h/./mon/moni386.h \
  ../h/./mon/montftp.h ../h/stdio.h
 bsm.o: ../paging/bsm.c /usr/include/stdc-predef.h ../h/conf.h \
- ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/paging.h ../h/proc.h
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/paging.h ../h/kernel.h \
+ ../h/proc.h
 control_reg.o: ../paging/control_reg.c /usr/include/stdc-predef.h \
  ../h/conf.h ../h/kernel.h ../h/systypes.h ../h/mem.h
 dump32.o: ../paging/dump32.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h
 frame.o: ../paging/frame.c /usr/include/stdc-predef.h ../h/conf.h \
- ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/paging.h
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/paging.h ../h/kernel.h \
+ ../h/proc.h
 get_bs.o: ../paging/get_bs.c /usr/include/stdc-predef.h ../h/conf.h \
- ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/paging.h
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/paging.h ../h/kernel.h \
+ ../h/proc.h
+paging_fifo.o: ../paging/paging_fifo.c /usr/include/stdc-predef.h \
+ ../h/paging_fifo.h ../h/paging.h ../h/kernel.h ../h/systypes.h \
+ ../h/conf.h ../h/mem.h
+paging_sc.o: ../paging/paging_sc.c /usr/include/stdc-predef.h \
+ ../h/paging_sc.h ../h/paging.h ../h/kernel.h ../h/systypes.h ../h/conf.h \
+ ../h/mem.h
 pfint.o: ../paging/pfint.c /usr/include/stdc-predef.h ../h/conf.h \
- ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/paging.h
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/paging.h ../h/kernel.h \
+ ../h/proc.h
 policy.o: ../paging/policy.c /usr/include/stdc-predef.h ../h/conf.h \
- ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/paging.h
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/paging.h ../h/kernel.h \
+ ../h/paging_fifo.h ../h/paging_sc.h
 read_bs.o: ../paging/read_bs.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/mark.h ../h/bufpool.h \
- ../h/proc.h ../h/paging.h
+ ../h/proc.h ../h/paging.h ../h/kernel.h
 release_bs.o: ../paging/release_bs.c /usr/include/stdc-predef.h \
- ../h/conf.h ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h \
- ../h/paging.h
+ ../h/conf.h ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/paging.h \
+ ../h/kernel.h ../h/proc.h
 vcreate.o: ../paging/vcreate.c /usr/include/stdc-predef.h ../h/conf.h \
- ../h/i386.h ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h \
- ../h/sem.h ../h/io.h ../h/paging.h
+ ../h/i386.h ../h/io.h ../h/kernel.h ../h/systypes.h ../h/mem.h \
+ ../h/paging.h ../h/kernel.h ../h/proc.h ../h/sem.h
 vfreemem.o: ../paging/vfreemem.c /usr/include/stdc-predef.h ../h/conf.h \
- ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/paging.h ../h/kernel.h \
+ ../h/proc.h
 vgetmem.o: ../paging/vgetmem.c /usr/include/stdc-predef.h ../h/conf.h \
- ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/paging.h
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/paging.h ../h/kernel.h \
+ ../h/proc.h
 write_bs.o: ../paging/write_bs.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/mark.h \
- ../h/bufpool.h ../h/paging.h
+ ../h/bufpool.h ../h/paging.h ../h/kernel.h
 xm.o: ../paging/xm.c /usr/include/stdc-predef.h ../h/conf.h ../h/kernel.h \
- ../h/systypes.h ../h/mem.h ../h/proc.h ../h/paging.h
+ ../h/systypes.h ../h/mem.h ../h/paging.h ../h/kernel.h ../h/proc.h
 blkcmp.o: ../sys/blkcmp.c /usr/include/stdc-predef.h
 blkequ.o: ../sys/blkequ.c /usr/include/stdc-predef.h ../h/kernel.h \
  ../h/systypes.h ../h/conf.h ../h/mem.h
@@ -495,7 +509,7 @@ control.o: ../sys/control.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/io.h
 create.o: ../sys/create.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/i386.h ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h \
- ../h/sem.h ../h/io.h ../h/paging.h
+ ../h/sem.h ../h/io.h ../h/paging.h ../h/kernel.h
 evec.o: ../sys/evec.c /usr/include/stdc-predef.h ../h/conf.h ../h/i386.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/sem.h \
  ../h/tty.h ../h/q.h ../h/io.h ../h/stdio.h
@@ -528,8 +542,9 @@ i386.o: ../sys/i386.c /usr/include/stdc-predef.h ../h/icu.h ../h/i386.h \
 init.o: ../sys/init.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/io.h
 initialize.o: ../sys/initialize.c /usr/include/stdc-predef.h ../h/conf.h \
- ../h/i386.h ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h \
- ../h/sem.h ../h/sleep.h ../h/tty.h ../h/q.h ../h/io.h ../h/paging.h
+ ../h/i386.h ../h/io.h ../h/kernel.h ../h/systypes.h ../h/mem.h \
+ ../h/paging.h ../h/kernel.h ../h/paging_fifo.h ../h/paging_sc.h \
+ ../h/proc.h ../h/q.h ../h/sem.h ../h/sleep.h ../h/tty.h
 insert.o: ../sys/insert.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/q.h
 insertd.o: ../sys/insertd.c /usr/include/stdc-predef.h ../h/conf.h \
@@ -540,13 +555,14 @@ ionull.o: ../sys/ionull.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h
 kill.o: ../sys/kill.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/sem.h \
- ../h/io.h ../h/q.h ../h/stdio.h
+ ../h/io.h ../h/q.h ../h/stdio.h ../h/paging.h ../h/kernel.h
 kprintf.o: ../sys/kprintf.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h
 kputc.o: ../sys/kputc.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/tty.h
 main.o: ../sys/main.c /usr/include/stdc-predef.h ../h/conf.h \
- ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/stdio.h
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/stdio.h \
+ ../h/paging.h ../h/kernel.h
 mark.o: ../sys/mark.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/mark.h
 mkpool.o: ../sys/mkpool.c /usr/include/stdc-predef.h ../h/conf.h \
@@ -579,7 +595,8 @@ recvtim.o: ../sys/recvtim.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/q.h \
  ../h/sleep.h ../h/stdio.h
 resched.o: ../sys/resched.c /usr/include/stdc-predef.h ../h/conf.h \
- ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/q.h
+ ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/q.h \
+ ../h/paging.h ../h/kernel.h
 resume.o: ../sys/resume.c /usr/include/stdc-predef.h ../h/conf.h \
  ../h/kernel.h ../h/systypes.h ../h/mem.h ../h/proc.h ../h/stdio.h
 scount.o: ../sys/scount.c /usr/include/stdc-predef.h ../h/conf.h \
