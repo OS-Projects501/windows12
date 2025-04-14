@@ -154,11 +154,7 @@ SYSCALL stacktrace(int pid);
 SYSCALL	suspend(int pid);
 SYSCALL	unsleep(int pid);
 SYSCALL	wait(int sem);
-
-// Custom system calls
-SYSCALL srpolicy(int policy);
-SYSCALL grpolicy();
-const char *as_str(int policy);
+SYSCALL vcreate(int procaddr, int ssize, int hsize, int priority, char *name, int nargs, long args);
 
 int strtclk();
 int stopclk();
@@ -174,5 +170,11 @@ DEVCALL putc(int descrp, char ch);
 DEVCALL read(int descrp, void *buf, int count);
 DEVCALL seek(int descrp, long pos);
 DEVCALL write(int descrp, void *buf, int count);
+
+/* Interrupt functions */
+unsigned long read_cr2();
+unsigned long read_cr3();
+
+#define GLOBAL_DEBUG 1
 
 #endif
