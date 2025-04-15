@@ -3,7 +3,7 @@
 #
 
 INCLUDE = -I../h
-CFLAGS  = -m32 -march=i586 -fno-stack-protector -fno-builtin -c -Wall -O ${DEFS} ${INCLUDE}
+CFLAGS  = -m32 -march=i586 -fno-stack-protector -fno-builtin -c -Wall -O ${DEFS} ${INCLUDE} -std=gnu99
 SDEFS	= -I../h
 ASFLAGS = --32
 
